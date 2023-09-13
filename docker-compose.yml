@@ -4,22 +4,25 @@ services:
     app:
         build:
             context: .
-            dockerfile: Dockerfile
-        # image: digitalocean.com/php
+            dockerfile: ./Dockerfile
         container_name: app
         ports:
-            - 8000:9000
+            - "${APP_PORT:-8000}:9000"
+            # - "8000:9000"
         restart: unless-stopped
         tty: true
         environment:
             SERVICE_NAME: app
             SERVICE_TAGS: dev
-        working_dir: /var/www
+        working_dir: /var/www/html
+
         volumes:
-            - ./:/var/www
+            - ./:/var/www/html
             - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
         networks:
-            - app-network
+            - laravel
+        depends_on:
+            - db
 
     #MySQL Service
     db:
@@ -41,11 +44,11 @@ services:
         volumes:
             - dbdata:/var/lib/mysql
         networks:
-            - app-network
+            - laravel
 
 #Docker Networks
 networks:
-    app-network:
+    laravel:
         driver: bridge
 
 #Volumes
